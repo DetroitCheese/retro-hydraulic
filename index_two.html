@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>250 Tonne Hydraulic Press Simulator</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a4c, #0c1a2f);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 30, 60, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid #2a4a7a;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+        
+        .subtitle {
+            color: #90a4ae;
+            font-size: 1.2rem;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .press-container {
+            flex: 1;
+            background: rgba(15, 30, 50, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid #2a4a7a;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .press-visualization {
+            position: relative;
+            height: 500px;
+            background: #0d1b2f;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #2a4a7a;
+            margin-bottom: 25px;
+        }
+        
+        .press-frame {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #2c3e50, #1c2833);
+        }
+        
+        .press-crown {
+            position: absolute;
+            top: 0;
+            left: 20%;
+            width: 60%;
+            height: 60px;
+            background: linear-gradient(to bottom, #455a64, #263238);
+            border-radius: 8px 8px 0 0;
+            border: 3px solid #37474f;
+        }
+        
+        .press-ram {
+            position: absolute;
+            top: 60px;
+            left: 30%;
+            width: 40%;
+            height: 40px;
+            background: linear-gradient(to bottom, #546e7a, #37474f);
+            border-radius: 4px;
+            border: 2px solid #78909c;
+            transition: top 2s ease-in-out;
+            z-index: 10;
+        }
+        
+        .press-platen {
+            position: absolute;
+            left: 25%;
+            width: 50%;
+            height: 30px;
+            background: linear-gradient(to bottom, #78909c, #546e7a);
+            border-radius: 4px;
+            border: 2px solid #b0bec5;
+        }
+        
+        .upper-platen {
+            top: 100px;
+        }
+        
+        .lower-platen {
+            bottom: 100px;
+        }
+        
+        .press-bed {
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            width: 60%;
+            height: 100px;
+            background: linear-gradient(to top, #455a64, #263238);
+            border-radius: 0 0 8px 8px;
+            border: 3px solid #37474f;
+        }
+        
+        .workpiece {
+            position: absolute;
+            left: 45%;
+            width: 10%;
+            height: 80px;
+            background: linear-gradient(to bottom, #ff9800, #f57c00);
+            border-radius: 4px;
+            border: 2px solid #ffb74d;
+            transition: height 1.5s ease-in-out;
+            z-index: 5;
+        }
+        
+        .hydraulic-cylinder {
+            position: absolute;
+            right: 15%;
+            width: 60px;
+            height: 320px;
+            background: linear-gradient(to bottom, #455a64, #263238);
+            border-radius: 10px;
+            border: 3px solid #37474f;
+            top: 80px;
+            overflow: hidden;
+        }
+        
+        .hydraulic-piston {
+            position: absolute;
+            bottom: 0;
+            left: 10px;
+            width: 40px;
+            background: linear-gradient(to bottom, #78909c, #546e7a);
+            border-radius: 5px 5px 0 0;
+            border: 2px solid #b0bec5;
+            transition: height 2s ease-in-out;
+        }
+        
+        .hydraulic-fluid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(41, 182, 246, 0.6);
+            transition: height 2s ease-in-out;
+        }
+        
+        .light-curtain {
+            position: absolute;
+            top: 60px;
+            height: 380px;
+            width: 15px;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(0, 255, 0, 0.8) 0px,
+                rgba(0, 255, 0, 0.8) 20px,
+                transparent 20px,
+                transparent 40px
+            );
+            z-index: 20;
+        }
+        
+        .curtain-left {
+            left: 18%;
+        }
+        
+        .curtain-right {
+            right: 18%;
+        }
+        
+        .control-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .panel-section {
+            background: rgba(15, 30, 50, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid #2a4a7a;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #4fc3f7;
+            border-bottom: 2px solid #2a4a7a;
+            padding-bottom: 10px;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .control-label {
+            width: 200px;
+            font-size: 1.1rem;
+        }
+        
+        .slider-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(to right, #1565c0, #2196f3);
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.7);
+            border: 2px solid #e1f5fe;
+        }
+        
+        .value-display {
+            width: 80px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: rgba(0, 30, 60, 0.6);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #2a4a7a;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to bottom, #2196f3, #0d47a1);
+            color: white;
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to bottom, #42a5f5, #1565c0);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to bottom, #78909c, #455a64);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(to bottom, #90a4ae, #546e7a);
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(to bottom, #ff9800, #ef6c00);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(to bottom, #ffa726, #f57c00);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to bottom, #f44336, #c62828);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(to bottom, #ef5350, #d32f2f);
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .indicator-light {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #455a64;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .indicator-light.active {
+            background: #00e676;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.7);
+        }
+        
+        .indicator-light.warning {
+            background: #ffeb3b;
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.7);
+        }
+        
+        .indicator-light.alarm {
+            background: #ff1744;
+            box-shadow: 0 0 15px rgba(255, 23, 68, 0.7);
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .status-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .status-item {
+            background: rgba(0, 30, 60, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 200px;
+            border: 1px solid #2a4a7a;
+        }
+        
+        .status-title {
+            font-size: 1rem;
+            color: #90a4ae;
+            margin-bottom: 5px;
+        }
+        
+        .status-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        .recipe-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .recipe-btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .alarm-panel {
+            background: rgba(211, 47, 47, 0.2);
+            border: 2px solid #f44336;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .alarm-panel.active {
+            display: flex;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { background: rgba(211, 47, 47, 0.2); }
+            50% { background: rgba(211, 47, 47, 0.4); }
+            100% { background: rgba(211, 47, 47, 0.2); }
+        }
+        
+        .alarm-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ff8a80;
+        }
+        
+        .emergency-stop {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        
+        .e-stop-btn {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #f44336, #b71c1c);
+            border: 8px solid #ff8a80;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+        
+        .e-stop-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.4);
+        }
+        
+        .press-active {
+            background: linear-gradient(to bottom, #546e7a, #2c3e50);
+            border-color: #4fc3f7;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #90a4ae;
+            font-size: 0.9rem;
+            border-top: 1px solid #2a4a7a;
+            margin-top: 20px;
+        }
+        
+        .mode-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>250 Tonne Hydraulic Press Simulator</h1>
+            <p class="subtitle">Interactive control panel with auto/manual operation modes</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="press-container">
+                <h2 class="section-title">Press Visualization</h2>
+                <div class="press-visualization">
+                    <div class="press-frame">
+                        <div class="press-crown"></div>
+                        <div class="press-ram" id="pressRam"></div>
+                        <div class="press-platen upper-platen"></div>
+                        <div class="workpiece" id="workpiece"></div>
+                        <div class="press-platen lower-platen"></div>
+                        <div class="press-bed"></div>
+                        <div class="hydraulic-cylinder">
+                            <div class="hydraulic-fluid" id="hydraulicFluid"></div>
+                            <div class="hydraulic-piston" id="hydraulicPiston"></div>
+                        </div>
+                        <div class="light-curtain curtain-left" id="leftCurtain"></div>
+                        <div class="light-curtain curtain-right" id="rightCurtain"></div>
+                    </div>
+                </div>
+                
+                <div class="status-display">
+                    <div class="status-item">
+                        <div class="status-title">CURRENT PRESSURE</div>
+                        <div class="status-value" id="pressureValue">0 Tonne</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-title">OPERATION MODE</div>
+                        <div class="status-value" id="modeValue">MANUAL</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-title">CYCLE COUNT</div>
+                        <div class="status-value" id="cycleValue">0</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-title">SAFETY STATUS</div>
+                        <div class="status-value" id="safetyValue">NORMAL</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h2 class="section-title">Operation Controls</h2>
+                    
+                    <div class="control-group">
+                        <div class="control-row">
+                            <div class="control-label">Operation Mode:</div>
+                            <div class="button-group">
+                                <button class="btn btn-primary" id="manualBtn">Manual</button>
+                                <button class="btn btn-secondary" id="autoBtn">Auto</button>
+                                <button class="btn btn-secondary" id="resetBtn">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-row">
+                            <div class="control-label">Pressure Control:</div>
+                            <div class="slider-container">
+                                <input type="range" min="0" max="250" value="0" class="slider" id="pressureSlider">
+                                <div class="value-display" id="pressureDisplay">0 T</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-row">
+                            <div class="control-label">Manual Controls:</div>
+                            <div class="button-group">
+                                <button class="btn btn-primary" id="downBtn">Down</button>
+                                <button class="btn btn-primary" id="upBtn">Up</button>
+                                <button class="btn btn-warning" id="cycleBtn">Single Cycle</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-row">
+                            <div class="control-label">Light Curtain:</div>
+                            <div class="indicator">
+                                <div class="indicator-light active" id="curtainIndicator"></div>
+                                <span>Operational</span>
+                            </div>
+                            <div class="button-group" style="margin-left: auto;">
+                                <button class="btn btn-secondary" id="toggleCurtainBtn">Simulate Fault</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alarm-panel" id="alarmPanel">
+                        <div class="alarm-text">ALARM: Safety light curtain interrupted!</div>
+                        <button class="btn btn-danger" id="resetAlarmBtn">Reset Alarm</button>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <h2 class="section-title">Recipe Selection</h2>
+                    <div class="recipe-buttons">
+                        <button class="btn recipe-btn btn-secondary" data-pressure="100">Recipe 1 (100T)</button>
+                        <button class="btn recipe-btn btn-secondary" data-pressure="150">Recipe 2 (150T)</button>
+                        <button class="btn recipe-btn btn-secondary" data-pressure="180">Recipe 3 (180T)</button>
+                        <button class="btn recipe-btn btn-secondary" data-pressure="220">Recipe 4 (220T)</button>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <h2 class="section-title">System Status</h2>
+                    <div class="control-row">
+                        <div class="control-label">Hydraulic System:</div>
+                        <div class="indicator">
+                            <div class="indicator-light active" id="hydraulicIndicator"></div>
+                            <span>Normal</span>
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <div class="control-label">Electrical System:</div>
+                        <div class="indicator">
+                            <div class="indicator-light active" id="electricalIndicator"></div>
+                            <span>Normal</span>
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <div class="control-label">Safety System:</div>
+                        <div class="indicator">
+                            <div class="indicator-light active" id="safetyIndicator"></div>
+                            <span>Normal</span>
+                        </div>
+                    </div>
+                    
+                    <div class="emergency-stop">
+                        <div class="e-stop-btn" id="eStopBtn">
+                            E-STOP
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Hydraulic Press Simulator | 250 Tonne Deep Draw Press | React-like Animation
+        </div>
+    </div>
+
+    <script type="text/babel">
+        // Press state management
+        const pressState = {
+            mode: 'manual', // auto, manual, reset
+            pressure: 0,
+            ramPosition: 'up', // up, down
+            lightCurtain: true,
+            alarms: [],
+            cycleCount: 0,
+            autoInterval: null,
+            isTransitioning: false
+        };
+        
+        // DOM Elements
+        const elements = {
+            pressRam: document.getElementById('pressRam'),
+            workpiece: document.getElementById('workpiece'),
+            hydraulicFluid: document.getElementById('hydraulicFluid'),
+            hydraulicPiston: document.getElementById('hydraulicPiston'),
+            leftCurtain: document.getElementById('leftCurtain'),
+            rightCurtain: document.getElementById('rightCurtain'),
+            pressureValue: document.getElementById('pressureValue'),
+            modeValue: document.getElementById('modeValue'),
+            cycleValue: document.getElementById('cycleValue'),
+            safetyValue: document.getElementById('safetyValue'),
+            pressureSlider: document.getElementById('pressureSlider'),
+            pressureDisplay: document.getElementById('pressureDisplay'),
+            curtainIndicator: document.getElementById('curtainIndicator'),
+            alarmPanel: document.getElementById('alarmPanel'),
+            hydraulicIndicator: document.getElementById('hydraulicIndicator'),
+            electricalIndicator: document.getElementById('electricalIndicator'),
+            safetyIndicator: document.getElementById('safetyIndicator'),
+            manualBtn: document.getElementById('manualBtn'),
+            autoBtn: document.getElementById('autoBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            downBtn: document.getElementById('downBtn'),
+            upBtn: document.getElementById('upBtn'),
+            cycleBtn: document.getElementById('cycleBtn')
+        };
+        
+        // Initialize press visualization
+        function initPress() {
+            updateRamPosition();
+            updateHydraulicSystem();
+            updateLightCurtain();
+            updateIndicators();
+            updateButtonStates();
+        }
+        
+        // Update button states based on mode
+        function updateButtonStates() {
+            // Update mode buttons
+            elements.manualBtn.disabled = pressState.mode === 'manual' || pressState.isTransitioning;
+            elements.autoBtn.disabled = pressState.mode === 'auto' || pressState.initPress;
+            
+            // Update manual controls
+            const manualEnabled = pressState.mode === 'manual' && !pressState.isTransitioning; //770
+            elements.downBtn.disabled = !manualEnabled || pressState.ramPosition === 'down';
+            elements.upBtn.disabled = !manualEnabled || pressState.ramPosition === 'up';
+            elements.cycleBtn.disabled = !manualEnabled;
+            
+            // Update UI styling
+            elements.manualBtn.classList.toggle('btn-primary', pressState.mode === 'manual');
+            elements.manualBtn.classList.toggle('btn-secondary', pressState.mode !== 'manual');
+            elements.autoBtn.classList.toggle('btn-primary', pressState.mode === 'auto');
+            elements.autoBtn.classList.toggle('btn-secondary', pressState.mode !== 'auto');
+            
+            // Add/remove disabled styling
+            elements.manualBtn.classList.toggle('mode-disabled', pressState.mode === 'manual' || pressState.isTransitioning);
+            elements.autoBtn.classList.toggle('mode-disabled', pressState.mode === 'auto' || pressState.isTransitioning);
+        }
+        
+        // Update ram position based on state
+        function updateRamPosition() {
+            if (pressState.ramPosition === 'down') {
+                elements.pressRam.style.top = '370px';
+                elements.workpiece.style.height = '40px';
+                elements.workpiece.style.bottom = '130px';
+            } else {
+                elements.pressRam.style.top = '100px';
+                elements.workpiece.style.height = '80px';
+                elements.workpiece.style.bottom = '150px';
+            }
+        }
+        
+        // Update hydraulic system visualization
+        function updateHydraulicSystem() {
+            const pressurePercentage = (pressState.pressure / 250) * 100;
+            elements.hydraulicFluid.style.height = `${pressurePercentage}%`;
+            elements.hydraulicPiston.style.height = `${pressurePercentage}%`;
+        }
+        
+        // Update light curtain visualization
+        function updateLightCurtain() {
+            if (pressState.lightCurtain) {
+                elements.leftCurtain.style.background = 'repeating-linear-gradient(to bottom, rgba(0, 255, 0, 0.8) 0px, rgba(0, 255, 0, 0.8) 20px, transparent 20px, transparent 40px)';
+                elements.rightCurtain.style.background = 'repeating-linear-gradient(to bottom, rgba(0, 255, 0, 0.8) 0px, rgba(0, 255, 0, 0.8) 20px, transparent 20px, transparent 40px)';
+                elements.curtainIndicator.className = 'indicator-light active';
+                elements.alarmPanel.classList.remove('active');
+            } else {
+                elements.leftCurtain.style.background = 'repeating-linear-gradient(to bottom, rgba(255, 0, 0, 0.8) 0px, rgba(255, 0, 0, 0.8) 20px, transparent 20px, transparent 40px)';
+                elements.rightCurtain.style.background = 'repeating-linear-gradient(to bottom, rgba(255, 0, 0, 0.8) 0px, rgba(255, 0, 0, 0.8) 20px, transparent 20px, transparent 40px)';
+                elements.curtainIndicator.className = 'indicator-light alarm';
+                elements.alarmPanel.classList.add('active');
+            }
+        }
+        
+        // Update all indicators and displays
+        function updateIndicators() {
+            elements.pressureValue.textContent = `${pressState.pressure} Tonne`;
+            elements.modeValue.textContent = pressState.mode.toUpperCase();
+            elements.cycleValue.textContent = pressState.cycleCount;
+            elements.safetyValue.textContent = pressState.lightCurtain ? 'NORMAL' : 'ALARM';
+            elements.pressureDisplay.textContent = `${pressState.pressure} T`;
+            elements.pressureSlider.value = pressState.pressure;
+            
+            // Update hydraulic indicator based on pressure
+            if (pressState.pressure > 200) {
+                elements.hydraulicIndicator.className = 'indicator-light warning';
+            } else if (pressState.pressure > 230) {
+                elements.hydraulicIndicator.className = 'indicator-light alarm';
+            } else {
+                elements.hydraulicIndicator.className = 'indicator-light active';
+            }
+        }
+        
+        // Move ram down
+        function ramDown() {
+            if (!pressState.lightCurtain || pressState.isTransitioning) return;
+            
+            pressState.isTransitioning = true;
+            updateButtonStates();
+            
+            pressState.ramPosition = 'down';
+            updateRamPosition();
+            elements.pressRam.classList.add('press-active');
+            
+            // Simulate pressure build-up
+            let currentPressure = 0;
+            const pressureInterval = setInterval(() => {
+                currentPressure += 5;
+                if (currentPressure > pressState.pressure) currentPressure = pressState.pressure;
+                pressState.pressure = currentPressure;
+                updateHydraulicSystem();
+                updateIndicators();
+                
+                if (currentPressure >= pressState.pressure) {
+                    clearInterval(pressureInterval);
+                    pressState.isTransitioning = false;
+                    updateButtonStates();
+                }
+            }, 50);
+        }
+        
+        // Move ram up
+        function ramUp() {
+            if (pressState.isTransitioning) return;
+            
+            pressState.isTransitioning = true;
+            updateButtonStates();
+            
+            pressState.ramPosition = 'up';
+            updateRamPosition();
+            elements.pressRam.classList.remove('press-active');
+            
+            // Simulate pressure release
+            let currentPressure = pressState.pressure;
+            const pressureInterval = setInterval(() => {
+                currentPressure -= 10;
+                if (currentPressure < 0) currentPressure = 0;
+                pressState.pressure = currentPressure;
+                updateHydraulicSystem();
+                updateIndicators();
+                
+                if (currentPressure <= 0) {
+                    clearInterval(pressureInterval);
+                    pressState.isTransitioning = false;
+                    updateButtonStates();
+                }
+            }, 50);
+        }
+        
+        // Perform a single press cycle
+        function singleCycle() {
+            if (pressState.ramPosition === 'up' && !pressState.singleCycle) {
+                ramDown();
+                setTimeout(() => {
+                    ramUp();
+                    pressState.cycleCount++;
+                    updateIndicators();
+                }, 2000);
+            }
+        }
+        
+        // Start auto mode
+        function startAutoMode() {
+            if (pressState.mode !== 'auto' || !pressState.lightCurtain) return;
+            
+            pressState.autoInterval = setInterval(() => {
+                if (!pressState.lightCurtain || pressState.switchToAuto) {
+                    clearInterval(pressState.autoInterval);
+                    return;
+                }
+                
+                if (pressState.ramPosition === 'up') {
+                    ramDown();
+                    setTimeout(() => {
+                        ramUp();
+                        pressState.cycleCount++;
+                        updateIndicators();
+                    }, 2000);
+                }
+            }, 4000);
+        }
+        
+        // Switch to manual mode
+        function switchToManual() {
+            if (pressState.mode === 'manual' || pressState.isTransitioning) return;
+            
+            clearInterval(pressState.autoInterval);
+            pressState.mode = 'manual';
+            updateIndicators();
+            updateButtonStates();
+        }
+        
+        // Switch to auto mode
+        function switchToAuto() {
+            if (pressState.mode === 'auto' || pressState.isTransitioning) return;
+            
+            // Can only switch to auto when ram is up
+            if (pressState.ramPosition === 'down') {
+                alert("Please raise ram before switching to auto mode!");
+                return;
+            }
+            
+            pressState.mode = 'auto';
+            updateIndicators();
+            updateButtonStates();
+            startAutoMode();
+        }
+        
+        // Reset press
+        function resetPress() {
+            clearInterval(pressState.autoInterval);
+            pressState.mode = 'reset';
+            pressState.pressure = 0;
+            pressState.ramPosition = 'up';
+            pressState.cycleCount = 0;
+            pressState.lightCurtain = true;
+            pressState.isTransitioning = false;
+            
+            updateRamPosition();
+            updateHydraulicSystem();
+            updateLightCurtain();
+            updateIndicators();
+            updateButtonStates();
+            
+            // Reset mode to manual after reset
+            setTimeout(() => {
+                pressState.mode = 'manual';
+                updateIndicators();
+                updateButtonStates();
+            }, 1000);
+        }
+        
+        // Event Listeners
+        elements.manualBtn.addEventListener('click', switchToManual);
+        elements.autoBtn.addEventListener('click', switchToAuto);
+        elements.resetBtn.addEventListener('click', resetPress);
+        
+        elements.downBtn.addEventListener('click', () => {
+            if (pressState.mode === 'manual' && pressState.ramPosition === 'up') {
+                ramDown();
+            }
+        });
+        
+        elements.upBtn.addEventListener('click', () => {
+            if (pressState.mode === 'manual' && pressState.ramPosition === 'down') {
+                ramUp();
+            }
+        });
+        
+        elements.cycleBtn.addEventListener('click', () => {
+            if (pressState.mode === 'manual') {
+                singleCycle();
+            }
+        });
+        
+        document.getElementById('toggleCurtainBtn').addEventListener('click', () => {
+            pressState.lightCurtain = !pressState.lightCurtain;
+            updateLightCurtain();
+            updateIndicators();
+            
+            if (!pressState.lightCurtain && pressState.mode === 'auto') {
+                clearInterval(pressState.autoInterval);
+            }
+        });
+        
+        document.getElementById('resetAlarmBtn').addEventListener('click', () => {
+            pressState.lightCurtain = true;
+            updateLightCurtain();
+            updateIndicators();
+            
+            if (pressState.mode === 'auto') {
+                startAutoMode();
+            }
+        });
+        
+        elements.pressureSlider.addEventListener('input', () => {
+            pressState.pressure = parseInt(elements.pressureSlider.value);
+            updateHydraulicSystem();
+            updateIndicators();
+        });
+        
+        document.querySelectorAll('.recipe-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const pressure = parseInt(button.getAttribute('data-pressure'));
+                pressState.pressure = pressure;
+                updateHydraulicSystem();
+                updateIndicators();
+            });
+        });
+        
+        document.getElementById('eStopBtn').addEventListener('click', () => {
+            // Emergency stop functionality
+            clearInterval(pressState.autoInterval);
+            pressState.mode = 'reset';
+            pressState.pressure = 0;
+            pressState.ramPosition = 'up';
+            pressState.lightCurtain = true;
+            pressState.isTransitioning = false;
+            
+            // Flash alarm
+            elements.safetyIndicator.className = 'indicator-light alarm';
+            setTimeout(() => {
+                elements.safetyIndicator.className = 'indicator-light active';
+            }, 500);
+            
+            updateRamPosition();
+            updateHydraulicSystem();
+            updateLightCurtain();
+            updateIndicators();
+            updateButtonStates();
+            
+            // Reset mode to manual after stop
+            setTimeout(() => {
+                pressState.mode = 'manual';
+                updateIndicators();
+                updateButtonStates();
+            }, 2000);
+        });
+        
+        // Initialize the press
+        initPress();
+    </script>
+</body>
+</html>
